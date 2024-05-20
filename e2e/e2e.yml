@@ -1,0 +1,15 @@
+env: "test"
+mongo:
+  url: "mongodb://localhost:27017"
+  collection: "test"
+parser:
+  enable: 0
+  url: "http://localhost:8889"
+  count: 1
+  time: "1s"
+http:
+  port: 8080
+  external_port: 8889
+  write_timeout: "100s"
+  read_timeout: "100s"
+  idle_timeout: "100s"

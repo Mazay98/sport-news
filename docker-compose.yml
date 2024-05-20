@@ -1,0 +1,56 @@
+version: '3.7'
+
+x-go-service: &go-service
+  security_opt:
+    - seccomp:unconfined
+  cap_add:
+    - SYS_PTRACE
+
+networks:
+  sport:
+    name: sport-news
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.50.0/24
+          gateway: 192.168.50.1
+
+volumes:
+  sport-news-data:
+  sport-news-db:
+
+services:
+  sport-news:
+    <<: *go-service
+    profiles:
+      - dev
+    ports:
+      - "8080:8080"
+    build:
+      context: ./
+      dockerfile: ./infra/Dockerfile
+    container_name: sport-news
+    environment:
+      - MONGO_URL=mongodb://sport-news-db:27017
+      - HTTP_PORT=${HTTP_PORT:-8080}
+      - PARSER_ENABLE=${PARSER_ENABLE:-1}
+      - MONGO_C_NAME=${MONGO_C_NAME:-sport-news}
+    restart: always
+    depends_on:
+      - sport-news-db
+    networks:
+      sport:
+
+  sport-news-db:
+    profiles:
+      - db
+      - dev
+    container_name: sport-news-db
+    image: mongo:latest
+    networks:
+      sport:
+    ports:
+      - "27017:27017"
+    volumes:
+      - sport-news-db:/data/db
